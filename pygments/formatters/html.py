@@ -11,6 +11,7 @@
 
 import os
 import sys
+import re
 import os.path
 import StringIO
 
@@ -638,7 +639,13 @@ class HtmlFormatter(Formatter):
         for t, line in inner:
             if t:
                 i += 1
-                yield 1, '<a name="%s-%d"></a>' % (s, i) + line
+                if self.anchorlinenos and self.linenos == 2:
+                    # in case of linenos == 2, put the line number in the link
+                    lineno = re.search("<span.+?>.+?</span>", line).group(0)
+                    yield 1, '<a href="#%s-%d" name="%s-%d">%s</a>' % (
+                        s, i, s, i, lineno) + line[len(lineno):]
+                else:
+                    yield 1, '<a name="%s-%d"></a>' % (s, i) + line
             else:
                 yield 0, line
 
